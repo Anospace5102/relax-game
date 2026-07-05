@@ -1,0 +1,20 @@
+1.player.cpp :  
+
+         ------|
+ground---------|
+               |
+             <-|    这样（跳崖后在地线下往回走）回直接弹到地面上
+
+            else 
+            {                                           
+                //保证在地平线上                                
+                setXY(x_, fx(x_) - player_height_);        
+                on_ground = true;
+            }
+
+2.实现二段跳（当前无限段跳）
+
+3.
+battlefieid.cpp : ground_line_.push_back(QLine(50, height*0.8, width*0.8, height*0.8));
+gamepage.cpp : ground_ = scene_->addLine(50, winy_* 0.8, winx_*0.8, winy_*0.8 );
+将这两个逻辑上的/图形上的合成一个 => 通过一个路径引入地平线的线段组给ground逻辑上/图形上赋值画出
