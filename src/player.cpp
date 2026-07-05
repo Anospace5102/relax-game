@@ -67,6 +67,10 @@ void Player::update()
         vy_ += ga;
         y_ += vy_;
     }
+    if(y_<=0){
+        y_=0;
+        vy_=-1*vy_;
+    }
 }
 
 
