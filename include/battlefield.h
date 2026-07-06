@@ -12,14 +12,14 @@ public:
     void update();
 
 public:
-    Player *player_;
+    Player *player_;    //玩家
 
 private:
     
 
 private:
     int width_, height_;
-    std::vector<QLine> ground_line_;
+    std::vector<QLine> ground_line_;    //地面-线段
 
 };
 

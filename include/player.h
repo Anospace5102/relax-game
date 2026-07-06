@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QLine>
 #include <vector>
-const float ga=0.08;
+const float ga=0.25;
 class Player
 {
 public:
@@ -11,10 +11,10 @@ public:
         int player_height=30,int player_width=20);
 
 public:
-    void deltaX(int dx);
-    void setVy(int vy);
-    void update();
-    void setOnGround(std::vector<QLine>& ground_line);
+    void deltaX(int dx);    //左右移动的时候delta_x
+    void setVy(int vy);     //跳-速度设置vy
+    void update();          //玩家自身逻辑更新
+    void setOnGround(std::vector<QLine>& ground_line);  //地面检测
 
 public:
     int x() const;

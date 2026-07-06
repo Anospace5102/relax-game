@@ -11,11 +11,13 @@ MainWindow::MainWindow(int width, int height, QWidget *parent)
 
     stacked = new QStackedWidget(this);
     setCentralWidget(stacked);
-    setupGamePage();
 
-    stacked ->addWidget(gamePage_);
+    setupGamePage();        //初始化游戏页面
 
-    stacked ->setCurrentWidget(gamePage_);
+    stacked ->addWidget(gamePage_);     //游戏页面加到切换容器
+
+    stacked ->setCurrentWidget(gamePage_);      //先设置成游戏界面方便处理，后续要有开始界面等等
+    gamePage_ ->init();
     gamePage_ ->start();
 
 }
@@ -30,6 +32,7 @@ void MainWindow::connection()
 
 }
 
+//初始化游戏页面
 void MainWindow::setupGamePage()
 {
 

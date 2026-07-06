@@ -33,8 +33,8 @@ private:
 private:
     int width_, height_;
     Ui::MainWindow *ui;
-    QStackedWidget *stacked = nullptr;
+    QStackedWidget *stacked = nullptr;  //切换的窗口的容器
 
-    GamePage *gamePage_;
+    GamePage *gamePage_;                //游戏窗口页面
 };
 #endif // MAINWINDOW_H
