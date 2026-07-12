@@ -127,10 +127,3 @@ void Player::update()
         vy_=-1*vy_;
     }
 }
-
-
-
-
-
-
-

@@ -147,4 +147,3 @@ void GamePage::keyReleaseEvent(QKeyEvent *event)
     pressed_keys_.remove(event->key());     //如果释放键=>移出按键集合
     QWidget::keyReleaseEvent(event);
 }
-
