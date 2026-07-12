@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QLine>
 #include <vector>
-const float ga=0.25;
+const float ga=0.4;
 class Player
 {
 public:
@@ -24,6 +24,8 @@ public:
 private:
     void setXY(int x, int y);
 private:
+    int jump_count_=0;
+    int max_jump_count_=2;//最多二段跳,但是实际运行的时候可以跳三次，还不清楚为什么
     int player_height_;
     int player_width_;
     int x_;
@@ -32,6 +34,23 @@ private:
     float vy_=0;
 
     bool on_ground;
+    //bool was_on_ground=false;
+public:
+    bool can_jump();
+    void jump(float jump_vy);
+
+    
+public:
+    void request_fire(); //确认发射
+    bool return_fire_requestd_(); //返回是否请求发射
+    void request_jump(); //确认跳跃
+    bool return_jump_requestd_(); //返回是否请求跳跃
+    int facing();
+    void set_facing(int facing);
+private:
+    bool jump_requested_=false;    //是否请求跳跃
+    bool fire_requested_=false;//是否请求发射
+    int player_facing=1;//玩家朝向 1为右 -1为左
 };
 
 #endif // PLAYER_H

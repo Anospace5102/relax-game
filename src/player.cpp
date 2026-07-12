@@ -25,11 +25,60 @@ void Player::setVy(int vy)
 {
     vy_ = vy;
     on_ground = false;
+    //was_on_ground = false;
 }
 
 void Player::setXY(int x, int y)
 {
     x_ = x; y_ = y;
+}
+
+bool Player::can_jump(){
+    return jump_count_<max_jump_count_;
+}
+
+void Player::jump(float jump_vy){
+    if(!can_jump()){
+        qDebug() << "can't jump,jump_count_:" << jump_count_;
+        return;
+    } 
+    setVy(jump_vy);
+    jump_count_++;
+    qDebug() << "jump_count_:" << jump_count_;
+}
+
+void Player::request_fire()
+{
+    fire_requested_=true;
+}
+
+bool Player::return_fire_requestd_()
+{
+    bool tmp=fire_requested_;
+    fire_requested_=false;
+    return tmp;
+}
+
+void Player::request_jump()
+{
+    jump_requested_=true;
+}
+
+bool Player::return_jump_requestd_()
+{
+    bool tmp=jump_requested_;
+    jump_requested_=false;
+    return tmp;
+}
+
+int Player::facing()
+{
+    return player_facing;
+}
+
+void Player::set_facing(int facing)
+{
+    player_facing = facing;
 }
 
 void Player::setOnGround(std::vector<QLine>& ground_line)
@@ -59,6 +108,10 @@ void Player::setOnGround(std::vector<QLine>& ground_line)
 
 void Player::update()
 {
+    if(on_ground){
+        jump_count_=0;
+    }
+    //was_on_ground=on_ground;
     if(on_ground && vy_ >= 0)
     {
         vy_ = 0;

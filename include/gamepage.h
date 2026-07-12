@@ -2,6 +2,7 @@
 #define GAMEPAGE_H
 
 #include "battlefield.h"
+#include "bullet.h"
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -41,7 +42,8 @@ private:
 
     QPixmap* player_pict_;          //人物图片
     QGraphicsPixmapItem * player_item_; //人物图片渲染
-
+public:
+    int get_player_width();
 
 private:
     BattleField *battle_field_;     //纯逻辑游戏战场
@@ -50,6 +52,9 @@ private:
     int winy_;      //界面高
     int player_size_;
 
+
+private:
+    QList<Bullet*>bullets_;  //子弹列表
 signals:
 
 };

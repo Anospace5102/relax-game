@@ -57,16 +57,74 @@ void GamePage::start()
     game_timer_ ->start(16);
 }
 
+int GamePage::get_player_width()
+{
+    return player_item_->pixmap().width();
+}
 // 场景更新
 void GamePage::updateScene()
 {
-    if(pressed_keys_.contains(Qt::Key_A)) battle_field_->player_->deltaX(-2);   //左
-    if(pressed_keys_.contains(Qt::Key_D)) battle_field_->player_->deltaX(2);    //右
-    if(pressed_keys_.contains(Qt::Key_W))
-    {//还要有几段跳控制-留白
-        
-        battle_field_->player_ ->setVy(-6);
+    int speed=1;
+    if(pressed_keys_.contains(Qt::Key_Shift)) speed=3;//shift加速
+    if(pressed_keys_.contains(Qt::Key_A)) {
+        battle_field_->player_->deltaX(-2*speed);   //左
+        battle_field_->player_->set_facing(-1);
     }
+    if(pressed_keys_.contains(Qt::Key_D)) {
+        battle_field_->player_->deltaX(2*speed);    //右
+        battle_field_->player_->set_facing(1);
+    }
+    if(pressed_keys_.contains(Qt::Key_W) && battle_field_->player_->return_jump_requestd_()) //长按也只能跳一次
+    {//二段跳控制
+        battle_field_ ->player_ ->jump(-6);
+    }
+
+    if(pressed_keys_.contains(Qt::Key_Space)&& battle_field_->player_->return_fire_requestd_()){ //空格发射子弹，长按只能发射一次
+        int px=battle_field_->player_->x();
+        int py=battle_field_->player_->y()+player_size_/2;
+        int facing=battle_field_->player_->facing();
+
+        float bullet_radius=5;
+        QGraphicsEllipseItem* bullet_item=new QGraphicsEllipseItem(0, 0, bullet_radius*2, bullet_radius*2);
+        bullet_item->setBrush(QBrush(Qt::red));
+        bullet_item->setPen(QPen(Qt::NoPen));
+        if(facing==-1){
+            bullet_item->setPos(px-bullet_radius, py-bullet_radius);
+        } else {
+            int player_width=player_item_->pixmap().width();
+            bullet_item->setPos(px+player_width+bullet_radius, py-bullet_radius);
+        }
+
+        scene_->addItem(bullet_item);
+
+        float bullet_speed=8;
+        float bullet_vx=bullet_speed*facing;
+        float bullet_vy=0;
+
+        Bullet* bullet=new Bullet{bullet_item, bullet_vx, bullet_vy, true, bullet_radius};
+        bullets_.append(bullet);
+    }
+
+    for(int i=bullets_.size()-1;i>=0;--i){
+        Bullet* bullet=bullets_[i];
+        if(!bullet->is_active()){
+            scene_->removeItem(bullet->item);
+            delete bullet->item;
+            delete bullet;
+            bullets_.removeAt(i);
+            continue;
+        }
+
+        QPointF pos=bullet->item->pos();
+        pos.rx()+=bullet->vx();
+        pos.ry()+=bullet->vy();
+        bullet->item->setPos(pos);
+
+        if(pos.x() < 0 || pos.x() > winx_ || pos.y() < 0 || pos.y() > winy_){
+            bullet->set_active(false);
+        }
+    }
+
 
     battle_field_->update();        //更新逻辑战斗场景
     player_item_ ->setPos(battle_field_->player_->x(), battle_field_->player_->y());
@@ -74,6 +132,12 @@ void GamePage::updateScene()
 
 void GamePage::keyPressEvent(QKeyEvent *event)
 {
+    if(event->key()==Qt::Key_W && !event->isAutoRepeat()){
+        battle_field_->player_->request_jump();  //请求跳跃
+    }
+    if(event->key()==Qt::Key_Space && !event->isAutoRepeat()){
+        battle_field_->player_->request_fire();  //请求开火
+    }
     pressed_keys_.insert(event->key());     //如果按键=>加入按键集合
     QWidget::keyPressEvent(event);
 }
