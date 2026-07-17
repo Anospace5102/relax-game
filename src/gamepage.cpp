@@ -82,7 +82,7 @@ void GamePage::updateScene()
     if(pressed_keys_.contains(Qt::Key_Space)&& battle_field_->player_->return_fire_requestd_()){ //空格发射子弹，长按只能发射一次
         int px=battle_field_->player_->x();
         int py=battle_field_->player_->y()+player_size_/2;
-        int facing=battle_field_->player_->facing();
+        int facing=battle_field_->player_->return_facing();
 
         float bullet_radius=5;
         QGraphicsEllipseItem* bullet_item=new QGraphicsEllipseItem(0, 0, bullet_radius*2, bullet_radius*2);

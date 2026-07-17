@@ -22,7 +22,10 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_executable(${PROJECT_NAME}
     # WIN32 # If you need a terminal for debug, please comment this statement //output --here!!!
     ${SOURCES}
-    include/bullet.h 
+    include/bullet.h
+    src/boss.cpp
+    include/base_role.h
+    src/base_role.cpp 
 ) 
 
 target_include_directories(${PROJECT_NAME}
