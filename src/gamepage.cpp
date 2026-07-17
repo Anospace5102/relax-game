@@ -2,7 +2,7 @@
 
 #include <QDebug>
 GamePage::GamePage(int x, int y):
-    winx_(x), winy_(y), player_size_(30)
+    winx_(x), winy_(y), player_size_(30), boss_size_(30)
 {
     //搭建：QWidget <- layout_ <- view <- scene_
     view_ = new QGraphicsView(this);
@@ -23,7 +23,7 @@ GamePage::GamePage(int x, int y):
 // 初始化-加载
 void GamePage::load()
 {
-    battle_field_  = new BattleField(winx_, winy_, player_size_);       //逻辑战场加载
+    battle_field_  = new BattleField(winx_, winy_, player_size_, boss_size_);       //逻辑战场加载
 
     player_pict_ = new QPixmap(QString(":/img/imags/player_01.png"));   //图片加载
     // qDebug()<<"here" <<view_->width();
@@ -31,6 +31,12 @@ void GamePage::load()
         player_pict_->scaled(player_size_,player_size_,Qt::KeepAspectRatio, Qt::SmoothTransformation));
     player_item_ ->setPos(winx_*0.1, winy_*0.8 - player_size_);
     scene_ ->addItem(player_item_);
+
+    boss_pict_ = new QPixmap(QString(":/img/imags/boss.png"));   //图片加载
+    boss_item_ = new QGraphicsPixmapItem(
+        boss_pict_->scaled(boss_size_,boss_size_,Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    boss_item_ ->setPos(winx_*0.7, winy_*0.8 - boss_size_);
+    scene_ ->addItem(boss_item_);
 }
 
 // 初始化-初始/重置
@@ -60,6 +66,11 @@ void GamePage::start()
 int GamePage::get_player_width()
 {
     return player_item_->pixmap().width();
+}
+
+int GamePage::get_boss_width()
+{
+    return boss_item_->pixmap().width();
 }
 // 场景更新
 void GamePage::updateScene()

@@ -42,8 +42,12 @@ private:
 
     QPixmap* player_pict_;          //人物图片
     QGraphicsPixmapItem * player_item_; //人物图片渲染
+
+    QPixmap* boss_pict_;          //boss图片
+    QGraphicsPixmapItem * boss_item_; //boss图片渲染
 public:
     int get_player_width();
+    int get_boss_width();
 
 private:
     BattleField *battle_field_;     //纯逻辑游戏战场
@@ -51,6 +55,7 @@ private:
     int winx_;      //界面宽
     int winy_;      //界面高
     int player_size_;
+    int boss_size_;
 
 
 private:
