@@ -12,6 +12,7 @@
 #include <QGraphicsItem>
 #include <QKeyEvent>
 #include <QTimer>
+#include <vector>
 
 //游戏页面
 class GamePage:public QWidget
@@ -38,7 +39,7 @@ private:
     QGraphicsView * view_;
     QGraphicsScene *scene_;
 
-    QGraphicsLineItem * ground_;    //地面-线
+    std::vector<QGraphicsRectItem*> grounds_;   //地面矩形
 
     QPixmap* player_pict_;          //人物图片
     QGraphicsPixmapItem * player_item_; //人物图片渲染
@@ -54,8 +55,6 @@ private:
 private:
     int winx_;      //界面宽
     int winy_;      //界面高
-    int player_size_;
-    int boss_size_;
 
 
 private:

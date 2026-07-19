@@ -1,18 +1,20 @@
 #ifndef _BOSS_H
 #define _BOSS_H
-#include"base_role.h"
+#include "base_role.h"
+#include "load.h"
 class Boss: public BaseRole{
 public:
-    Boss(int x,int y,int height=30,int width=20,int hp=30)
-    :BaseRole(x,y,height,width,hp)
-    {
-
-    };
+    Boss(Load::BOSS& w);
 
 public:
-    // int deltaX(int dx);  //左右移动时改变x
-    // void setVy(int vy);  //跳跃时改变vy
-    // void update();   //boss自身逻辑更新
+    void update(double fixed_step) override;   //boss自身逻辑更新
+
+
+public:
+    int hp() const;
+    void change_hp(int hp);
+private:
+    int hp_;
 
 };
 

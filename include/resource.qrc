@@ -3,4 +3,7 @@
         <file>../imags/player_01.png</file>
         <file>../imags/boss.png</file>
     </qresource>
+    <qresource prefix="/config">
+        <file>../config/world.json</file>
+    </qresource>
 </RCC>

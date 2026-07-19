@@ -1,48 +1,23 @@
 #include "player.h"
 
-Player::Player(int x, int y, int player_height, int player_width,int hp)
-    :BaseRole(x, y, player_height, player_width, hp)
-{
 
+Player::Player(Load::PLAYER& w)
+    :BaseRole(w.base_param)
+    , hp_ (w.hp)
+{
+   
+    
 }
 
-// int Player::x()const
-// {return x_; }
+int Player::hp() const
+{
+    return hp_;
+}
 
-// int Player::y()const
-// {return y_; }
-
-// int Player::vy() const
-// {return vy_; }
-
-// void Player::deltaX(int dx)
-// {x_ += dx; }
-
-// void Player::setVy(int vy)
-// {
-//     vy_ = vy;
-//     on_ground = false;
-//     //was_on_ground = false;
-// }
-
-// void Player::setXY(int x, int y)
-// {
-//     x_ = x; y_ = y;
-// }
-
-// bool Player::can_jump(){
-//     return jump_count_<max_jump_count_;
-// }
-
-// void Player::jump(float jump_vy){
-//     if(!can_jump()){
-//         qDebug() << "can't jump,jump_count_:" << jump_count_;
-//         return;
-//     } 
-//     setVy(jump_vy);
-//     jump_count_++;
-//     qDebug() << "jump_count_:" << jump_count_;
-// }
+void Player::change_hp(int hp)
+{
+    hp_ += hp;
+}
 
 void Player::request_fire()
 {
@@ -68,15 +43,30 @@ bool Player::return_jump_requestd_()
     return tmp;
 }
 
-// int Player::facing()
-// {
-//     return player_facing;
-// }
 
-// void Player::set_facing(int facing)
-// {
-//     player_facing = facing;
-// }
+void Player::update(double fixed_step)
+{
+    if(on_ground_){
+        jump_count_=0;
+    }
+
+    //was_on_ground=on_ground;
+    if(on_ground_ && vy_ >= 0)
+    {
+        vy_ = 0;
+    }
+    else {
+        vy_ += ga*fixed_step;
+        y_ += vy_*fixed_step;
+    }
+    rect_.moveTo(x_, y_);
+
+    //可以有--后来可以加上控制--控制有无上界限制
+    if(y_<=0){
+        y_=0;
+        vy_=0;
+    }
+}
 
 // void Player::setOnGround(std::vector<QLine>& ground_line)
 // {
@@ -99,28 +89,58 @@ bool Player::return_jump_requestd_()
 //             }
 //         }
 //         else on_ground = false;
-        
 //     }
 // }
-
-// void Player::update()
+// QRect* Player::intersected(std::vector<QRect>& ground_rects_)
 // {
-//     if(on_ground){
-//         jump_count_=0;
+//     for(int i=0; i<ground_rects_.size();i++)
+//     {qDebug()<<"detected"<<player_rect_.y();
+//         if(ground_rects_[i].intersected(player_rect_ ).isValid())
+//         {
+//             collisionHandling(&ground_rects_[i]);
+//             return &ground_rects_[i];
+//         }
+//     } 
+//     on_ground = false;
+//     return nullptr;
+// }
+// void Player::collisionHandling(QRect* ground)
+// {
+//     if(ground == nullptr) return;
+//     QPainterPath path;
+//     path.clear();
+//     path.moveTo(ground->topLeft());
+//     path.lineTo(ground->bottomLeft());
+//     if (path.intersects(player_rect_)) //地面矩形左面
+//     {
+//         x_ = ground->left() - player_rect_.width()- 1;
 //     }
-//     //was_on_ground=on_ground;
-//     if(on_ground && vy_ >= 0)
+//     path.clear();
+//     path.moveTo(ground->topRight());
+//     path.lineTo(ground->bottomRight());
+//     if (path.intersects(player_rect_)) //地面矩形右面
+//     {
+//         x_ = ground->right()+1;
+//     }
+//     path.clear();
+//     path.moveTo(ground->topLeft());
+//     path.lineTo(ground->topRight());
+//     if (path.intersects(player_rect_)) //地面矩形上面
+//     {
+//         on_ground = true;
+//         vy_ = 0;
+//         y_ = ground->top() - player_rect_.height();
+//     }
+//     path.clear();
+//     path.moveTo(ground->bottomLeft());
+//     path.lineTo(ground->bottomRight());
+//     if (path.intersects(player_rect_)) //地面矩形下面
 //     {
 //         vy_ = 0;
-//     }
-//     else {
-//         vy_ += ga;
-//         y_ += vy_;
-//     }
-
-//     //可以有--后来可以加上控制--控制有无上界限制
-//     if(y_<=0){
-//         y_=0;
-//         vy_=-1*vy_;
+//         y_ = ground->bottom()+1;
 //     }
 // }
+
+
+
+

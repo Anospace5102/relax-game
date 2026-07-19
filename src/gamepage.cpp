@@ -1,8 +1,9 @@
 #include "gamepage.h"
-
+#include "load.h"
 #include <QDebug>
+#include <vector>
 GamePage::GamePage(int x, int y):
-    winx_(x), winy_(y), player_size_(30), boss_size_(30)
+    winx_(x), winy_(y)
 {
     //搭建：QWidget <- layout_ <- view <- scene_
     view_ = new QGraphicsView(this);
@@ -23,20 +24,30 @@ GamePage::GamePage(int x, int y):
 // 初始化-加载
 void GamePage::load()
 {
-    battle_field_  = new BattleField(winx_, winy_, player_size_, boss_size_);       //逻辑战场加载
+    Load::world world_config = Load::getWorldInformation(); 
 
+    for(auto it: world_config.grounds)
+    {
+        auto grd = scene_-> addRect(it);
+        grd -> setPen(QPen(Qt::black, 2));
+        grounds_ .push_back(grd);
+    }
+    battle_field_  = new BattleField(winx_, winy_, world_config);       //逻辑战场加载
+
+    QRect rt = world_config.player[0].base_param.role_rect;
     player_pict_ = new QPixmap(QString(":/img/imags/player_01.png"));   //图片加载
-    // qDebug()<<"here" <<view_->width();
     player_item_ = new QGraphicsPixmapItem(
-        player_pict_->scaled(player_size_,player_size_,Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    player_item_ ->setPos(winx_*0.1, winy_*0.8 - player_size_);
+        player_pict_->scaled(rt.width(), rt.height(),Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    player_item_ ->setPos(battle_field_->player_->x(), battle_field_->player_->y());
     scene_ ->addItem(player_item_);
 
+    rt = world_config.boss[0].base_param.role_rect;
     boss_pict_ = new QPixmap(QString(":/img/imags/boss.png"));   //图片加载
     boss_item_ = new QGraphicsPixmapItem(
-        boss_pict_->scaled(boss_size_,boss_size_,Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    boss_item_ ->setPos(winx_*0.7, winy_*0.8 - boss_size_);
+        boss_pict_->scaled(rt.width(), rt.height(),Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    boss_item_ ->setPos(battle_field_->boss_->x(), battle_field_->boss_->y());
     scene_ ->addItem(boss_item_);
+    
 }
 
 // 初始化-初始/重置
@@ -44,9 +55,6 @@ void GamePage::init()
 {
     game_timer_ = new QTimer(this); 
     
-    ground_ = scene_->addLine(50, winy_* 0.8, winx_*0.8, winy_*0.8 );
-    ground_->setPen(QPen(Qt::black, 2));
-
     connections();
 }
 
@@ -87,12 +95,12 @@ void GamePage::updateScene()
     }
     if(pressed_keys_.contains(Qt::Key_W) && battle_field_->player_->return_jump_requestd_()) //长按也只能跳一次
     {//二段跳控制
-        battle_field_ ->player_ ->jump(-6);
+        battle_field_ ->player_ ->jump(-400);
     }
 
     if(pressed_keys_.contains(Qt::Key_Space)&& battle_field_->player_->return_fire_requestd_()){ //空格发射子弹，长按只能发射一次
         int px=battle_field_->player_->x();
-        int py=battle_field_->player_->y()+player_size_/2;
+        int py=battle_field_->player_->y()+battle_field_->player_->rect().height()/2;
         int facing=battle_field_->player_->return_facing();
 
         float bullet_radius=5;
@@ -139,6 +147,7 @@ void GamePage::updateScene()
 
     battle_field_->update();        //更新逻辑战斗场景
     player_item_ ->setPos(battle_field_->player_->x(), battle_field_->player_->y());
+    boss_item_ -> setPos(battle_field_->boss_->x(), battle_field_->boss_->y());
 }
 
 void GamePage::keyPressEvent(QKeyEvent *event)

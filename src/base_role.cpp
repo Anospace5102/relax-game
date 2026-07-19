@@ -1,71 +1,23 @@
 #include"base_role.h"
 
-BaseRole::BaseRole(int x,int y,int height,int width,int hp)
-    :x_(x),y_(y)
-    ,on_ground(true)
-    ,height_(height)
-    ,width_(width)
-    ,hp_(hp)
+BaseRole::BaseRole(QRect role_rect, int max_jump_count)
+    : on_ground_(false)
+    , rect_(role_rect)
+    , jump_count_(0)
+    , max_jump_count_(max_jump_count)
 {
-
+    x_ = role_rect.left();
+    y_ = role_rect.top();
 }
 
-int BaseRole::deltaX(int dx)
+BaseRole::BaseRole(Load::BASR_ROLE& base_param)
+    :rect_(base_param.role_rect) 
+    , max_jump_count_(base_param.max_jump)
+    , on_ground_(false)
+    , jump_count_(0)
 {
-    x_+=dx;
-    return x_;
-}
-
-void BaseRole::setVy(int vy)
-{
-    vy_=vy;
-    on_ground=false;
-}
-
-void BaseRole::update()
-{
-    if(on_ground){
-        jump_count=0;
-    }
-    if(on_ground && vy_ >= 0)
-    {
-        vy_ = 0;
-    }
-    else {
-        vy_ += ga;
-        y_ += vy_;
-    }
-
-    //可以有--后来可以加上控制--控制有无上界限制
-    if(y_<=0){
-        y_=0;
-        vy_=-1*vy_;
-    }
-}
-
-void BaseRole::setOnGround(std::vector<QLine>& ground_line)
-{
-    for(int i=0; i<ground_line.size(); ++i)
-    {   
-        QLine line=ground_line[i];
-        auto fx = [line](int x) -> float{
-            return line.y1()+(x-line.x1())*(line.y2()-line.y1())/(line.x2()-line.x1());
-        };
-        if((x_ < line.x2()&& x_+ width_ >line.x1())
-            ||(x_ < line.x1()&& x_+ width_ >line.x2())) //在这段线上
-        {
-            if(y_ < fx(x_) - height_)  
-                on_ground = false;
-            else 
-            {   
-                //保证在地平线上
-                setXY(x_, fx(x_) - height_);
-                on_ground = true;
-            }
-        }
-        else on_ground = false;
-        
-    }
+    x_ = rect_.left();
+    y_ = rect_.top();
 }
 int BaseRole::x() const
 {return x_;}
@@ -76,14 +28,45 @@ int BaseRole::y() const
 int BaseRole::vy() const
 {return vy_;}
 
+bool BaseRole::isOnGround() const
+{return on_ground_;}
+
+QRect BaseRole::rect() const
+{return rect_;}
+
+int BaseRole::return_facing() const
+{ return facing_;}
+
+bool BaseRole::can_jump()
+{
+    return jump_count_ < max_jump_count_;
+}
+
+/////////////////////////////////////////
+
+int BaseRole::deltaX(int dx)
+{
+    x_+=dx;
+    return x_;
+}
+
+void BaseRole::setVy(int vy)
+{vy_=vy;}
+
+void BaseRole::setOnGround(bool is_on_ground)
+{on_ground_ = is_on_ground;}
+
 void BaseRole::setXY(int x,int y)
 {
     x_=x; y_=y;
+    rect_.moveTo(x, y);
 }
 
-int BaseRole::return_facing() const
+void BaseRole::setXY(QPoint pnt)
 {
-    return facing_;
+    x_ = pnt.x();
+    y_ = pnt.y();
+    rect_.moveTo(pnt);
 }
 
 void BaseRole::set_facing(int facing)
@@ -91,26 +74,16 @@ void BaseRole::set_facing(int facing)
     facing_=facing;
 }
 
-bool BaseRole::can_jump()
-{
-    return jump_count<max_jump_count;
-}
-
 void BaseRole::jump(float jump_vy)
 {
     if(can_jump())
     {
         setVy(jump_vy);
-        jump_count++;
+        setOnGround(false);//不在地上
+        jump_count_ ++;
     }
 }
 
-int BaseRole::hp() const
-{
-    return hp_;
-}
+///////////////////////////////////////////////
 
-void BaseRole::change_hp(int hp)
-{
-    hp_+=hp;
-}
+

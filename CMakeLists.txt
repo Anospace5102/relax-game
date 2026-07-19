@@ -5,7 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
@@ -21,11 +21,9 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 add_executable(${PROJECT_NAME}
     # WIN32 # If you need a terminal for debug, please comment this statement //output --here!!!
-    ${SOURCES}
-    include/bullet.h
+    ${SOURCES}#SOURCES把.h加都进去了
+    src/base_role.cpp
     src/boss.cpp
-    include/base_role.h
-    src/base_role.cpp 
 ) 
 
 target_include_directories(${PROJECT_NAME}
