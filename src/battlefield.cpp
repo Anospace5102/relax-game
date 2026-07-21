@@ -28,6 +28,9 @@ void BattleField::update()
     accumulator += delta_time;
     while(accumulator >= fixed_step)        //以固定时间步长为单位处理
     {
+        //按键处理
+        keySetHandle();
+
         player_->update(fixed_step);
         if(!intersectWithGround(player_))
         { player_->setOnGround(false);};    //最好不要在碰撞检测里面判断地面，可以再做一个小区域地面接触检测
@@ -40,16 +43,16 @@ void BattleField::update()
     }
 
 
-    qDebug() << "[[PLAYER]]::"
-        << "[position]:("<< player_->x() << player_->y() << ")" 
-        <<" [vy]:"<< player_ ->vy() 
-        <<" [on ground]:"<< player_ ->isOnGround();
+    // qDebug() << "[[PLAYER]]::"
+    //     << "[position]:("<< player_->x() << player_->y() << ")" 
+    //     <<" [vy]:"<< player_ ->vy() 
+    //     <<" [on ground]:"<< player_ ->isOnGround();
 
-    qDebug() << "[[BOSS]]::"
-        << "[position]:("<< boss_->x() << boss_->y() << ")" 
-        <<" [vy]:"<< boss_ ->vy() 
-        <<" [on ground]:"<< boss_ ->isOnGround();
-    qDebug() << "--------------------------------------------";
+    // qDebug() << "[[BOSS]]::"
+    //     << "[position]:("<< boss_->x() << boss_->y() << ")" 
+    //     <<" [vy]:"<< boss_ ->vy() 
+    //     <<" [on ground]:"<< boss_ ->isOnGround();
+    // qDebug() << "--------------------------------------------";
 }
 //
 QRect* BattleField::intersectWithGround(BaseRole* role)
@@ -179,4 +182,40 @@ qreal BattleField::intersectedLength(const QRectF &rect, const QLineF &line)
     return QLineF(enterPoint, exitPoint).length();
 }
 
+void BattleField::keySetHandle()
+{
+    int speed=1;
+    if(key_set_.contains(Qt::Key_Shift)) speed=3;//shift加速
+    if(key_set_.contains(Qt::Key_A)) {
+        player_->deltaX(-2*speed);   //左
+        player_->set_facing(-1);
+    }
+    if(key_set_.contains(Qt::Key_D)) {
+        player_->deltaX(2*speed);    //右
+        player_->set_facing(1);
+    }
+    if(key_set_.contains(Qt::Key_W) && player_->return_jump_requestd_()) //长按也只能跳一次
+    {//二段跳控制
+        player_ ->jump(-400);
+    }
+}
 
+void BattleField::addKey(int key)
+{
+    key_set_.insert(key);
+}
+
+void BattleField::removeKey(int key)
+{
+    key_set_.remove(key);
+}
+
+void BattleField::keySpaceHandle()
+{
+    player_->request_fire();
+}
+
+void BattleField::keyWHandle()
+{
+    player_->request_jump();
+}

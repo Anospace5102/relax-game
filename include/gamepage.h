@@ -17,6 +17,7 @@
 //游戏页面
 class GamePage:public QWidget
 {
+    Q_OBJECT
 public:
     GamePage(int x, int y);
     void start();
@@ -60,6 +61,10 @@ private:
 private:
     QList<Bullet*>bullets_;  //子弹列表
 signals:
+    void addKey(int key);
+    void removeKey(int key);
+    void keySpaceSignal();
+    void keyWSignal();
 
 };
 

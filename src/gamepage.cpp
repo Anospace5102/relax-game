@@ -63,6 +63,11 @@ void GamePage::connections()
 {
     //game_timer_  <==> updateScene
     connect(game_timer_, &QTimer::timeout, this, &GamePage::updateScene);
+    connect(this, &GamePage::addKey, battle_field_, &BattleField::addKey);
+    connect(this, &GamePage::removeKey, battle_field_, &BattleField::removeKey);
+    connect(this, &GamePage::keySpaceSignal, battle_field_, &BattleField::keySpaceHandle);
+    connect(this, &GamePage::keyWSignal, battle_field_, &BattleField::keyWHandle);
+
 }
 
 //开始
@@ -83,20 +88,6 @@ int GamePage::get_boss_width()
 // 场景更新
 void GamePage::updateScene()
 {
-    int speed=1;
-    if(pressed_keys_.contains(Qt::Key_Shift)) speed=3;//shift加速
-    if(pressed_keys_.contains(Qt::Key_A)) {
-        battle_field_->player_->deltaX(-2*speed);   //左
-        battle_field_->player_->set_facing(-1);
-    }
-    if(pressed_keys_.contains(Qt::Key_D)) {
-        battle_field_->player_->deltaX(2*speed);    //右
-        battle_field_->player_->set_facing(1);
-    }
-    if(pressed_keys_.contains(Qt::Key_W) && battle_field_->player_->return_jump_requestd_()) //长按也只能跳一次
-    {//二段跳控制
-        battle_field_ ->player_ ->jump(-400);
-    }
 
     if(pressed_keys_.contains(Qt::Key_Space)&& battle_field_->player_->return_fire_requestd_()){ //空格发射子弹，长按只能发射一次
         int px=battle_field_->player_->x();
@@ -153,17 +144,21 @@ void GamePage::updateScene()
 void GamePage::keyPressEvent(QKeyEvent *event)
 {
     if(event->key()==Qt::Key_W && !event->isAutoRepeat()){
-        battle_field_->player_->request_jump();  //请求跳跃
+        emit keyWSignal();
     }
     if(event->key()==Qt::Key_Space && !event->isAutoRepeat()){
-        battle_field_->player_->request_fire();  //请求开火
+        emit keySpaceSignal();
     }
-    pressed_keys_.insert(event->key());     //如果按键=>加入按键集合
+    pressed_keys_.insert(event->key());     
+    emit addKey(event->key());//如果按键=>加入按键集合
     QWidget::keyPressEvent(event);
 }
 
 void GamePage::keyReleaseEvent(QKeyEvent *event)
 {
-    pressed_keys_.remove(event->key());     //如果释放键=>移出按键集合
+    pressed_keys_.remove(event->key());     
+    emit removeKey(event->key());//如果释放键=>移出按键集合
     QWidget::keyReleaseEvent(event);
 }
+
+

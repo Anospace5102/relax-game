@@ -2,6 +2,35 @@
 #define _BULLET_H
 #include<QGraphicsEllipseItem>
 
+enum BulletType
+{
+    Radius,
+    Rect,
+    Polygon
+};
+
+class Bullet_
+{
+public: 
+    Bullet_(){};
+public:
+    // bool is_active()const;
+ 
+public:
+    // void set_active(bool active);
+    
+
+private:
+    
+    QRect rect_;
+    QPolygonF polygon_;
+
+    QPointF pos_;
+    QPointF v_;
+    BulletType type_;
+    bool is_active_;
+
+};
 class Bullet{
 public:
     Bullet(QGraphicsEllipseItem* item, float vx, float vy, bool is_active, float radius);
