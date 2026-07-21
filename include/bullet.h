@@ -1,7 +1,7 @@
 #ifndef _BULLET_H
 #define _BULLET_H
 #include<QGraphicsEllipseItem>
-
+//建议形式
 enum BulletType
 {
     Radius,
