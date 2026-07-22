@@ -19,8 +19,6 @@ public: //覆写
     void update(double fixed_step) override;  
 
 public:
-    int hp() const;
-    void change_hp(int hp);
 
     void request_fire(); //确认发射
     bool return_fire_requestd_(); //返回是否请求发射
@@ -28,7 +26,7 @@ public:
     bool return_jump_requestd_(); //返回是否请求跳跃
 
 private:
-    int hp_;
+    
 
     bool jump_requested_=false;    //是否请求跳跃
     bool fire_requested_=false;//是否请求发射

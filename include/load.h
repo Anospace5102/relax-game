@@ -13,15 +13,15 @@ namespace Load{
     struct BASR_ROLE{
         QRect role_rect;
         int max_jump;
+        int hp;
     };
     struct PLAYER{
         Load::BASR_ROLE base_param;
-        int hp;
+        
     };
 
     struct BOSS{
         Load::BASR_ROLE base_param;
-        int hp;
     };
 
     struct world{

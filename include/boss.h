@@ -11,10 +11,9 @@ public:
 
 
 public:
-    int hp() const;
-    void change_hp(int hp);
+    
 private:
-    int hp_;
+    
 
 };
 

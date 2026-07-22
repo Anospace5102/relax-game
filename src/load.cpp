@@ -46,7 +46,7 @@ Load::world Load::getWorldInformation()
         int h = player_obj["h"].toInt();
         player.base_param.role_rect = QRect(x, y, w, h);
         player.base_param.max_jump = player_obj["max_jump"].toInt();
-        player.hp = player_obj["hp"].toInt();
+        player.base_param.hp = player_obj["hp"].toInt();
 
         a_world_inf.player.push_back(player);
     }
@@ -62,7 +62,7 @@ Load::world Load::getWorldInformation()
         int h = boss_obj["h"].toInt();
         boss.base_param.role_rect = QRect(x, y, w, h);
         boss.base_param.max_jump = boss_obj["max_jump"].toInt();
-        boss.hp = boss_obj["hp"].toInt();
+        boss.base_param.hp = boss_obj["hp"].toInt();
 
         a_world_inf.boss.push_back(boss);
     }
@@ -70,4 +70,3 @@ Load::world Load::getWorldInformation()
     qDebug() << "Loaded" << a_world_inf.grounds.size() << "ground rects from JSON";
     return a_world_inf;
 }
-

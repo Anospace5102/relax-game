@@ -43,16 +43,16 @@ void BattleField::update()
     }
 
 
-    // qDebug() << "[[PLAYER]]::"
-    //     << "[position]:("<< player_->x() << player_->y() << ")" 
-    //     <<" [vy]:"<< player_ ->vy() 
-    //     <<" [on ground]:"<< player_ ->isOnGround();
+    qDebug() << "[[PLAYER]]::"
+        << "[position]:("<< player_->x() << player_->y() << ")" 
+        <<" [v]:("<< player_->vx() << player_->vy() <<")"
+        <<" [on ground]:"<< player_ ->isOnGround();
 
-    // qDebug() << "[[BOSS]]::"
-    //     << "[position]:("<< boss_->x() << boss_->y() << ")" 
-    //     <<" [vy]:"<< boss_ ->vy() 
-    //     <<" [on ground]:"<< boss_ ->isOnGround();
-    // qDebug() << "--------------------------------------------";
+    qDebug() << "[[BOSS]]::"
+        << "[position]:("<< boss_->x() << boss_->y() << ")" 
+        <<" [vy]:"<< boss_ ->vy() 
+        <<" [on ground]:"<< boss_ ->isOnGround();
+    qDebug() << "--------------------------------------------";
 }
 //
 QRect* BattleField::intersectWithGround(BaseRole* role)
@@ -72,7 +72,9 @@ QRect* BattleField::intersectWithGround(BaseRole* role)
 void BattleField::collisionHandling(BaseRole* role, QRect ground)
 {
     QRect rect = role->rect();
-    QPoint pnt= rect.topLeft();
+    // 使用 role 的实际浮点坐标，避免 int 截断造成左右移不对称
+    double rx = role->x();
+    double ry = role->y();
     //玩家为矩形，地面为四条线相交
     qreal top_i, bottom_i, left_i, right_i;
     top_i   = intersectedLength(rect, QLine(ground.topLeft(),  ground.topRight()));
@@ -87,48 +89,48 @@ void BattleField::collisionHandling(BaseRole* role, QRect ground)
         {
             role ->setOnGround(true);
             role ->setVy(0);
-            pnt.setY(ground.top() - rect.height()+1);
+            ry = ground.top() - rect.height()+1;
         }   
         else if(left_i < bottom_i && top_i == 0 )    //下面的
         {
             role -> setVy(0);
-            pnt.setY(ground.bottom()+1);
+            ry = ground.bottom()+1;
         }
         else  //左侧
-            pnt.setX(ground.left() - rect.width()- 1);
+            rx = ground.left() - rect.width()- 1;
 
     }else if(right_i && !left_i){
         if(right_i < top_i && bottom_i==0 )   //上方
         {
             role ->setOnGround(true);
             role ->setVy(0);
-            pnt.setY(ground.top() - rect.height()+1);
+            ry = ground.top() - rect.height()+1;
         }   
         else if(right_i < bottom_i && top_i == 0 )    //下面的
         {
             role -> setVy(0);
-            pnt.setY(ground.bottom()+1);
+            ry = ground.bottom()+1;
         }
         else  //右侧
-            pnt.setX(ground.right() + 1);
+            rx = ground.right() + 1;
     }else {
 
         if( top_i && !bottom_i )   //上方
         {
             role ->setOnGround(true);
             role ->setVy(0);
-            pnt.setY(ground.top() - rect.height() +1) ;
+            ry = ground.top() - rect.height() +1 ;
         }   
         else if( !top_i && bottom_i )    //下面的
         {
             role -> setVy(0);
-            pnt.setY(ground.bottom()+1);
+            ry = ground.bottom()+1;
         }
         else{
             qDebug()<<"I DON'T KNOW";
         }  
     }
-    role ->setXY(pnt);
+    role ->setXY(QPointF(rx, ry));
 }
 //Liang-Barskey
 qreal BattleField::intersectedLength(const QRectF &rect, const QLineF &line) 
@@ -186,13 +188,19 @@ void BattleField::keySetHandle()
 {
     int speed=1;
     if(key_set_.contains(Qt::Key_Shift)) speed=3;//shift加速
-    if(key_set_.contains(Qt::Key_A)) {
-        player_->deltaX(-2*speed);   //左
+    bool contain_a = key_set_.contains(Qt::Key_A);
+    bool contain_d = key_set_.contains(Qt::Key_D);
+
+    if(contain_a && !contain_d) {   // <-
+        player_->setVx(-150 * speed) ;   //左
         player_->set_facing(-1);
     }
-    if(key_set_.contains(Qt::Key_D)) {
-        player_->deltaX(2*speed);    //右
+    else if(!contain_a && contain_d) {   // ->
+        player_->setVx(150 * speed);
         player_->set_facing(1);
+    }
+    else{
+        player_->setVx(0) ;
     }
     if(key_set_.contains(Qt::Key_W) && player_->return_jump_requestd_()) //长按也只能跳一次
     {//二段跳控制
