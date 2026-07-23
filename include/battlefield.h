@@ -4,12 +4,13 @@
 #include "player.h"
 #include "boss.h"
 #include "load.h"
+#include "bullet.h"
 #include <vector>
 #include <QElapsedTimer>
 #include <QObject>
 #include <QSet>
 
-class BattleField:public QObject
+class BattleField: public QObject
 {
     Q_OBJECT
 public:
@@ -19,6 +20,7 @@ public:
 public:
     Player *player_;    //玩家
     Boss *boss_;        //boss
+    QList<Bullet*> bullets_;
 
 public://按键与消息
     void addKey(int key);
@@ -37,17 +39,21 @@ private:
     QElapsedTimer logical_timer_;
     //按键集合，迁移到逻辑层
     QSet<int> key_set_;
+    std::vector<Load::BULLET> bullets_param_;
 
 private:
     //按键集合处理，迁移到逻辑层
     void keySetHandle();
+    //子弹处理
+    void bulletsManagement(double fixed_step);
     //矩形rect和地面组相交接触检测
     QRect* intersectWithGround(BaseRole* role);
     //碰撞处理  //BaseRole* role类型兼容规则
     void collisionHandling(BaseRole* role, QRect ground);
     //LiangBarskey裁剪算法-求线段和矩形相交的长度
     qreal intersectedLength(const QRectF &rect, const QLineF &line);
-    
+    //检查线段和圆相交否
+    bool LineSegmentCircleIntersect(QPointF p1, QPointF p2, QPointF center, double radius, int tolerance=2);
 };
 
 

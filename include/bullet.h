@@ -1,54 +1,62 @@
 #ifndef _BULLET_H
 #define _BULLET_H
-#include<QGraphicsEllipseItem>
+#include <QGraphicsItem>
+#include <QList>
 #include "base_role.h"
 //建议形式
 enum BulletType
 {
-    Radius,
+    Circle,
     Rect,
     Polygon
 };
 
-// class Bullet_ :public BaseObject
-// {
-// public: 
-//     Bullet_(){};
-// public:
-//     // bool is_active()const;
- 
-// public:
-//     // void set_active(bool active);
-    
+enum Belonging { player, boss };
 
-// private:
-    
-//     QRect rect_;
-//     QPolygonF polygon_;
-
-    
-//     BulletType type_;
-//     bool is_active_;
-
-// };
-class Bullet{
+class Bullet : public BaseObject
+{
 public:
-    Bullet(QGraphicsEllipseItem* item, float vx, float vy, bool is_active, float radius);
-
+    Bullet(Belonging belonging, BulletType type, QPointF& pos,
+         double radius, double damage, bool is_active=true);
+    Bullet(Belonging belonging, BulletType type, QPointF& pos,
+         double width, double height, double damage, bool is_active=true);
+    Bullet(Belonging belonging, BulletType type, QPointF& pos,
+         QPolygonF& polygon, double damage,bool is_active=true);
 public:
-    QGraphicsEllipseItem* item;
-private:
-    float vx_;
-    float vy_;
-    bool is_active_;
-    float radius;
-public:
-    float vx() const;
-    float vy() const;
+    void update(double fixed_step);
     bool is_active() const;
+    double damage() const;
+    Belonging belonging() const;
+    BulletType type() const;
+    double radius() const;
+    QRect rect() const;
+    QPolygonF polygon() const;
+public:
     void set_active(bool active);
+    void set_damage(double damage);
 
+private:
+    double radius_;
+    QRect rect_;
+    QPolygonF polygon_;
+
+    BulletType type_;
+    Belonging belonging_;
+    bool is_active_;
+
+    double damage_;
 };
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+class QGraphicsBulletsItem : public QGraphicsItem {
+public:
+    explicit QGraphicsBulletsItem(QList<Bullet*>& bulletList);
 
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
+
+private:
+    QList<Bullet*>& bullets_;
+};
 
 #endif //_BULLET_H

@@ -30,9 +30,9 @@ private://event
     void connections();
 private:
     void load();
+    void drawTexts();
 
 private:
-    QSet<int> pressed_keys_;
     QTimer* game_timer_;            //更新定时器
 
     //QWidget <- layout_ <- view <- scene_
@@ -41,25 +41,21 @@ private:
     QGraphicsScene *scene_;
 
     std::vector<QGraphicsRectItem*> grounds_;   //地面矩形
+    QGraphicsBulletsItem* bullets_ = nullptr;
 
     QPixmap* player_pict_;          //人物图片
     QGraphicsPixmapItem * player_item_; //人物图片渲染
 
     QPixmap* boss_pict_;          //boss图片
     QGraphicsPixmapItem * boss_item_; //boss图片渲染
-public:
-    int get_player_width();
-    int get_boss_width();
+
+    QGraphicsSimpleTextItem* boss_hp_text;
 
 private:
     BattleField *battle_field_;     //纯逻辑游戏战场
-private:
     int winx_;      //界面宽
     int winy_;      //界面高
 
-
-private:
-    QList<Bullet*>bullets_;  //子弹列表
 signals:
     void addKey(int key);
     void removeKey(int key);

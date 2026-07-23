@@ -47,6 +47,7 @@ Load::world Load::getWorldInformation()
         player.base_param.role_rect = QRect(x, y, w, h);
         player.base_param.max_jump = player_obj["max_jump"].toInt();
         player.base_param.hp = player_obj["hp"].toInt();
+        player.base_param.basic_damage = player_obj["basic_damage"].toDouble();
 
         a_world_inf.player.push_back(player);
     }
@@ -63,8 +64,21 @@ Load::world Load::getWorldInformation()
         boss.base_param.role_rect = QRect(x, y, w, h);
         boss.base_param.max_jump = boss_obj["max_jump"].toInt();
         boss.base_param.hp = boss_obj["hp"].toInt();
+        boss.base_param.basic_damage = boss_obj["basic_damage"].toDouble();
 
         a_world_inf.boss.push_back(boss);
+    }
+
+    QJsonArray bulletsArray = root["bullets"].toArray();
+    for (const auto& val : bulletsArray) {
+        QJsonObject bullet_obj = val.toObject();
+        Load::BULLET bullet;
+        bullet.type_id = bullet_obj["type_id"].toInt();
+        bullet.shape = bullet_obj["shape"].toString();
+        bullet.radius = bullet_obj["radius"].toDouble();
+        bullet.velocity = bullet_obj["velocity"].toDouble();
+
+        a_world_inf.bullets.push_back(bullet);
     }
 
     qDebug() << "Loaded" << a_world_inf.grounds.size() << "ground rects from JSON";

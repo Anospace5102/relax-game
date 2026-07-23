@@ -4,7 +4,7 @@ BaseObject::BaseObject(double x, double y)
     : pos_ (x, y), v_(0, 0)
 {}
 BaseObject::BaseObject(QPointF p)
-    :BaseObject(p.x(), p.y())
+    : pos_ (p)
 {}
 
 double BaseObject::x() const
@@ -46,13 +46,14 @@ void BaseObject::moveBy(double dx, double dy)//virtual
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-BaseRole::BaseRole(QRect role_rect, int max_jump_count, int hp)
+BaseRole::BaseRole(QRect role_rect, int max_jump_count, double hp)
     : BaseObject(role_rect.topLeft())
     , on_ground_(false)
     , rect_(role_rect)
     , jump_count_(0)
     , max_jump_count_(max_jump_count)
     , hp_ (hp)
+    , basic_damage_(2)
 {}
 
 BaseRole::BaseRole(Load::BASR_ROLE& base_param)
@@ -62,6 +63,7 @@ BaseRole::BaseRole(Load::BASR_ROLE& base_param)
     , on_ground_(false)
     , jump_count_(0)
     , hp_ (base_param.hp)
+    , basic_damage_(base_param.basic_damage)
 {}
 
 void BaseRole::setXY(QPointF pos)   //override
@@ -85,10 +87,13 @@ QRect BaseRole::rect() const
 int BaseRole::return_facing() const
 { return facing_;}
 
-int BaseRole::hp() const
+double BaseRole::hp() const
 {return hp_;}
 
-void BaseRole::change_hp(int hp)
+double BaseRole::basicDamage() const
+{return basic_damage_;}
+
+void BaseRole::change_hp(double hp)
 {hp_ += hp;}
 
 bool BaseRole::can_jump()

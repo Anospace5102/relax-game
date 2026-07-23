@@ -2,6 +2,7 @@
 #include <iostream>
 BattleField::BattleField(int width, int height, Load::world& world_config)
     :width_(width), height_(height)
+    , bullets_param_(world_config.bullets)
 {
     ground_rects_.clear();   //地线
     ground_rects_ = world_config.grounds;
@@ -30,6 +31,7 @@ void BattleField::update()
     {
         //按键处理
         keySetHandle();
+        bulletsManagement(fixed_step);
 
         player_->update(fixed_step);
         if(!intersectWithGround(player_))
@@ -38,10 +40,9 @@ void BattleField::update()
         boss_->update(fixed_step);
         if(!intersectWithGround(boss_ ))
         { boss_ ->setOnGround(false);}      //这一步 ！没有和任何地面交互则为离地
-        
+
         accumulator -= fixed_step;
     }
-
 
     qDebug() << "[[PLAYER]]::"
         << "[position]:("<< player_->x() << player_->y() << ")" 
@@ -54,6 +55,76 @@ void BattleField::update()
         <<" [on ground]:"<< boss_ ->isOnGround();
     qDebug() << "--------------------------------------------";
 }
+
+void BattleField::bulletsManagement(double fixed_step)
+{
+    auto it = bullets_.begin();
+    while (it != bullets_.end()) {
+        Bullet* bullet = *it;
+
+        if (!bullet->is_active()) {
+            it = bullets_.erase(it);
+            delete bullet;
+            continue;///////////////////////////////////
+        } 
+
+        bullet->update(fixed_step);
+        
+        bool intersected = false;
+        QPointF cter = bullet->pos() + QPointF(bullet->radius(), bullet->radius());
+
+        //地面
+        for(auto& gnd :ground_rects_)
+        {
+            if(LineSegmentCircleIntersect(gnd.topLeft() , gnd.bottomLeft(), cter, bullet->radius(), 0))  intersected = true;
+            if(LineSegmentCircleIntersect(gnd.topLeft() , gnd.topRight()  , cter, bullet->radius(), 0))  intersected = true;
+            if(LineSegmentCircleIntersect(gnd.topRight(), gnd.bottomRight(), cter, bullet->radius(), 0)) intersected = true;
+            if(LineSegmentCircleIntersect(gnd.bottomLeft(), gnd.bottomRight(), cter, bullet->radius(), 0)) intersected = true;
+        }
+        if(intersected){
+            bullet->set_active(false); 
+            continue;
+        }
+        //boss攻击，玩家检测
+        if(bullet->belonging() == Belonging::boss)
+        {
+            QRect player_rect = player_ ->rect();
+            if(LineSegmentCircleIntersect(player_rect.topLeft() , player_rect.bottomLeft(), cter, bullet->radius(), 2))  intersected = true;
+            if(LineSegmentCircleIntersect(player_rect.topLeft() , player_rect.topRight()  , cter, bullet->radius(), 2))  intersected = true;
+            if(LineSegmentCircleIntersect(player_rect.topRight(), player_rect.bottomRight(), cter, bullet->radius(), 2)) intersected = true;
+            if(LineSegmentCircleIntersect(player_rect.bottomLeft(), player_rect.bottomRight(), cter, bullet->radius(), 2)) intersected = true;
+        
+            if(intersected){
+                bullet->set_active(false); 
+                continue;
+            }
+        }
+        
+        //玩家攻击，boss检测
+        if(bullet->belonging() == Belonging::player)
+        {
+            QRect boss_rect = boss_ ->rect();
+            if(LineSegmentCircleIntersect(boss_rect.topLeft() , boss_rect.bottomLeft(), cter, bullet->radius(), 3))  intersected = true;
+            if(LineSegmentCircleIntersect(boss_rect.topLeft() , boss_rect.topRight()  , cter, bullet->radius(), 3))  intersected = true;
+            if(LineSegmentCircleIntersect(boss_rect.topRight(), boss_rect.bottomRight(), cter, bullet->radius(), 3)) intersected = true;
+            if(LineSegmentCircleIntersect(boss_rect.bottomLeft(), boss_rect.bottomRight(), cter, bullet->radius(), 3)) intersected = true; 
+            
+            if(intersected){
+                bullet->set_active(false); 
+                boss_->change_hp(-1* bullet->damage());
+                qDebug() << boss_->hp();
+                continue;
+            }
+        }
+
+        //出界了
+        if (bullet->x() < 0 || bullet->x() > width_ || bullet->y() < 0 || bullet->y() > height_) {
+            bullet->set_active(false);
+        }
+        ++it;
+    }
+}
+
 //
 QRect* BattleField::intersectWithGround(BaseRole* role)
 {
@@ -132,7 +203,7 @@ void BattleField::collisionHandling(BaseRole* role, QRect ground)
     }
     role ->setXY(QPointF(rx, ry));
 }
-//Liang-Barskey
+//Liang-Barskey，通过交线长短他是和上下左右那个边界接触更合适
 qreal BattleField::intersectedLength(const QRectF &rect, const QLineF &line) 
 {
     QPointF p1 = line.p1();
@@ -184,10 +255,36 @@ qreal BattleField::intersectedLength(const QRectF &rect, const QLineF &line)
     return QLineF(enterPoint, exitPoint).length();
 }
 
+bool BattleField::LineSegmentCircleIntersect(QPointF p1, QPointF p2, QPointF center, double radius, int tolerance)
+{
+    double r = radius - tolerance;
+    QPointF d1 = center - p1;
+    if(d1.x()*d1.x()+d1.y()*d1.y()<=r*r) return true;
+
+    QPointF d2 = center - p2;
+    if(d2.x()*d2.x()+d2.y()*d2.y()<=r*r) return true;
+
+    QPointF ab = p2 - p1;
+    QPointF ac = center - p1;
+
+    //投影比例
+    double t = QPointF::dotProduct(ab, ac) / QPointF::dotProduct(ab, ab);
+
+    //端点离圆心更近，而端点在圆内已经被排除了
+    if(t>1 || t<0) return false;
+
+    QPointF foot = p1 + t * ab;
+    QPointF dis = center - foot;
+    if(dis.x()*dis.x()+dis.y()*dis.y()<=r*r) return true;
+    else return false;
+}
+
 void BattleField::keySetHandle()
 {
     int speed=1;
     if(key_set_.contains(Qt::Key_Shift)) speed=3;//shift加速
+    
+    //左右移动
     bool contain_a = key_set_.contains(Qt::Key_A);
     bool contain_d = key_set_.contains(Qt::Key_D);
 
@@ -202,9 +299,35 @@ void BattleField::keySetHandle()
     else{
         player_->setVx(0) ;
     }
+
+    //二段跳控制
     if(key_set_.contains(Qt::Key_W) && player_->return_jump_requestd_()) //长按也只能跳一次
-    {//二段跳控制
+    {
         player_ ->jump(-400);
+    }
+
+    //空格发射
+    if(key_set_.contains(Qt::Key_Space) 
+        && player_->return_fire_requestd_())
+    {
+        double bullet_radius=bullets_param_[0].radius;
+        //这里的点是左上角，和矩形一样
+        QPointF p(player_->x(), player_->y() + player_->rect().height()/2.0 - bullet_radius);
+        int facing =player_->return_facing();
+
+        if(facing == -1){
+            p.setX(p.x() - bullet_radius * 2) ;
+        } else {
+            p.setX(p.x() + player_->rect().width() );
+        }   
+        double vx = bullets_param_[0].velocity;
+        QPointF pv(100 * vx * facing, 0);
+        Bullet* bullet=new Bullet(Belonging::player, BulletType::Circle
+                            , p, bullet_radius, player_->basicDamage() , true );
+        
+        bullet->setV(pv);
+
+        bullets_.append(bullet);
     }
 }
 
@@ -227,3 +350,4 @@ void BattleField::keyWHandle()
 {
     player_->request_jump();
 }
+
