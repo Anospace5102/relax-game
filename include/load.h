@@ -37,6 +37,7 @@ namespace Load{
         std::vector<Load::BOSS>   boss;
         std::vector<Load::BULLET> bullets;
     };
+    //加载参数，返回一个'世界'的参数
     Load::world getWorldInformation();
 
 };

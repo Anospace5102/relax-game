@@ -56,7 +56,7 @@ private:
     int winx_;      //界面宽
     int winy_;      //界面高
 
-signals:
+signals:    //按键集合 ，在逻辑层处理了这里只做按键检测并且向逻辑层发送信号
     void addKey(int key);
     void removeKey(int key);
     void keySpaceSignal();

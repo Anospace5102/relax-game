@@ -48,6 +48,7 @@ private:
 };
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
+// 新写了一个QGraphicsItem直接加到scene_里面，这个是把所有的子弹当作一个整体一起画的
 class QGraphicsBulletsItem : public QGraphicsItem {
 public:
     explicit QGraphicsBulletsItem(QList<Bullet*>& bulletList);

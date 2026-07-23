@@ -257,7 +257,7 @@ qreal BattleField::intersectedLength(const QRectF &rect, const QLineF &line)
 
 bool BattleField::LineSegmentCircleIntersect(QPointF p1, QPointF p2, QPointF center, double radius, int tolerance)
 {
-    double r = radius - tolerance;
+    double r = radius - tolerance;  //抠点边界
     QPointF d1 = center - p1;
     if(d1.x()*d1.x()+d1.y()*d1.y()<=r*r) return true;
 
@@ -268,6 +268,10 @@ bool BattleField::LineSegmentCircleIntersect(QPointF p1, QPointF p2, QPointF cen
     QPointF ac = center - p1;
 
     //投影比例
+    //vector(a) * vector(b)  = |vector(a)| * |vector(b)| *cos<a, b>
+    //cos<a, b> * |vector(b)| = [vector(a)*vector(b)] / |vector(a)| * |vector(b)|
+    //                        = [vector(a)*vector(b)] / |vector(a)|             //向量b在向量a上的投影
+    //在此基础上再除以|vector(a)|得到向量b在向量a上的投影比例,即t,  doProduct--点乘
     double t = QPointF::dotProduct(ab, ac) / QPointF::dotProduct(ab, ab);
 
     //端点离圆心更近，而端点在圆内已经被排除了
@@ -279,7 +283,7 @@ bool BattleField::LineSegmentCircleIntersect(QPointF p1, QPointF p2, QPointF cen
     else return false;
 }
 
-void BattleField::keySetHandle()
+void BattleField::keySetHandle()//按键的映射搬到了这里
 {
     int speed=1;
     if(key_set_.contains(Qt::Key_Shift)) speed=3;//shift加速
@@ -311,10 +315,11 @@ void BattleField::keySetHandle()
         && player_->return_fire_requestd_())
     {
         double bullet_radius=bullets_param_[0].radius;
-        //这里的点是左上角，和矩形一样
+        //这里的点是左上角，和矩形一样！！！！！！
         QPointF p(player_->x(), player_->y() + player_->rect().height()/2.0 - bullet_radius);
         int facing =player_->return_facing();
 
+        //朝向和人物宽度问题
         if(facing == -1){
             p.setX(p.x() - bullet_radius * 2) ;
         } else {
@@ -322,12 +327,13 @@ void BattleField::keySetHandle()
         }   
         double vx = bullets_param_[0].velocity;
         QPointF pv(100 * vx * facing, 0);
+        //传的参数尽量通过外部配置(json)
         Bullet* bullet=new Bullet(Belonging::player, BulletType::Circle
                             , p, bullet_radius, player_->basicDamage() , true );
         
         bullet->setV(pv);
 
-        bullets_.append(bullet);
+        bullets_.append(bullet);//加入子弹列表
     }
 }
 

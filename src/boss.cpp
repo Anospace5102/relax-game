@@ -18,7 +18,8 @@ void Boss::update(double fixed_step)
         setVy(vy() + ga * fixed_step);
         moveBy(0, vy() * fixed_step);
     }
-
+    moveBy(vx() * fixed_step, 0);
+    
     if(y() <= 0){
         setXY(QPointF(x(), 0));
         setVy(0);
